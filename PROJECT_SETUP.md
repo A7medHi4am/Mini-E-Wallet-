@@ -18,6 +18,7 @@ This project is a closed wallet system with:
 - Database: PostgreSQL for development and production
 - Frontend: React (Vite or Create React App) with fetch/axios for API calls
 - Authentication: JWT and BCrypt password hashing
+- Node.js is required only to build/run the React frontend, not for the Java backend
 - Testing: backend unit/integration tests with JUnit 5 + Mockito; frontend component tests
 - Git workflow: one shared repo, feature branches, pull requests, code reviews
 
@@ -106,10 +107,11 @@ Person 4 – Admin Panel & Transaction History
 1. Install JDK 17.
 2. Install Maven.
 3. Install Docker Desktop.
-4. Copy `.env.example` to `.env` and adjust values if needed.
-5. From the repo root:
+4. Install Node.js if you are working on the React frontend.
+5. Copy `.env.example` to `.env` and adjust values if needed.
+6. From the repo root:
    - `docker-compose up --build`
-6. The backend will be available at `http://localhost:8080`.
+7. The backend will be available at `http://localhost:8080`
 
 ## Database
 
