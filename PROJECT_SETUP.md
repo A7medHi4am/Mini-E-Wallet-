@@ -4,9 +4,10 @@
 
 - `backend/` - Spring Boot backend project
 - `frontend/person1-auth/` - Person 1 frontend work (auth and profile)
-- `frontend/person2-wallet-ops/` - Person 2 frontend work (dashboard, top-up, transfers)
-- `frontend/person3-merchant-payments/` - Person 3 frontend work (merchants and payments)
-- `frontend/person4-admin-panel/` - Person 4 frontend work (admin, history)
+- `frontend/person2-wallet-topup/` - Person 2 frontend work (dashboard, top-up)
+- `frontend/person3-transfers-payments/` - Person 3 frontend work (send money, merchants, pay merchant)
+- `frontend/person4-history/` - Person 4 frontend work (transaction history, filtering)
+- `frontend/person5-admin-panel/` - Person 5 frontend work (admin dashboard, freeze/unfreeze)
 - `README.md` - project summary and setup notes
 - `.gitignore` - ignore file for Java, IDE, Node, env files
 - `PROJECT_SETUP.md` - project split and branch plan
@@ -41,13 +42,15 @@ Core MVP features:
 - Person 1: `backend/src/main/java/com/example/miniewallet/auth/**`
 - Person 2: `backend/src/main/java/com/example/miniewallet/wallet/**`
 - Person 3: `backend/src/main/java/com/example/miniewallet/merchant/**`
-- Person 4: `backend/src/main/java/com/example/miniewallet/admin/**`
+- Person 4: `backend/src/main/java/com/example/miniewallet/history/**`
+- Person 5: `backend/src/main/java/com/example/miniewallet/admin/**`
 
 ### Frontend ownership
 - Person 1: `frontend/person1-auth/**`
-- Person 2: `frontend/person2-wallet-ops/**`
-- Person 3: `frontend/person3-merchant-payments/**`
-- Person 4: `frontend/person4-admin-panel/**`
+- Person 2: `frontend/person2-wallet-topup/**`
+- Person 3: `frontend/person3-transfers-payments/**`
+- Person 4: `frontend/person4-history/**`
+- Person 5: `frontend/person5-admin-panel/**`
 
 ### Shared files (coordinate changes)
 - `backend/pom.xml`
@@ -67,38 +70,46 @@ Person 1 – Authentication & User Management
 - Database: user table, wallet table.
 - Testing: registration tests, login tests, password hashing validation, profile access.
 
-Person 2 – Wallet Operations
-- Backend: top-up endpoint with TOPUP transaction, user-to-user transfers, transaction service, balance validation, `@Transactional` atomic operations, idempotency with reference IDs, no negative balances.
-- Frontend: wallet dashboard, top-up screen, send money screen.
-- Database: transaction table, wallet balance updates.
-- Testing: top-up success, transfer success, insufficient balance, duplicate request handling.
+Person 2 – Wallet Top-Up & Balance Core
+- Backend: top-up endpoint (min/max validation), `Transaction` entity + base transaction service, `@Transactional` balance-update logic, shared debit/credit helper, no-negative-balance enforcement.
+- Frontend: dashboard (balance + recent transactions), top-up page.
+- Database: Transaction table schema + base CRUD.
+- Testing: top-up success/failure, balance-update unit tests.
 
-Person 3 – Merchant Payments
-- Backend: Merchant entity and wallet creation, merchant CRUD/Admin creation, merchant search/list endpoint, merchant payment endpoint, atomic merchant payment transaction logic.
-- Frontend: merchant list/search page, pay merchant flow.
-- Database: merchant table, merchant wallet relationship.
-- Testing: merchant payment success, payment failure, merchant creation.
+Person 3 – Transfers & Merchant Payments
+- Backend: user-to-user transfer endpoint, Merchant entity + merchant CRUD (admin-facing), merchant wallet creation, merchant payment endpoint, idempotency with reference IDs for transfers and payments.
+- Frontend: send-to-user page, merchant list/search page, pay-merchant page.
+- Database: Merchant table, merchant-wallet relationship.
+- Testing: transfer success, merchant payment, insufficient balance, duplicate-request idempotency.
 
-Person 4 – Admin Panel & Transaction History
-- Backend: admin endpoints for users/wallets/transactions, freeze/unfreeze wallet, AdminAuditLog entries, transaction history endpoint with filtering/pagination.
-- Frontend: admin dashboard, users page, wallet management page, transactions page, freeze controls, user transaction history page.
+Person 4 – Transaction History & Filtering
+- Backend: paginated transaction-history endpoint (per user), filtering by type/date range, counterparty resolution for display.
+- Frontend: full transaction history page with filters, shared history component for admin dashboard reuse.
+- Database: indexes/queries for efficient filtered pagination on Transaction table.
+- Testing: history pagination, filter correctness, counterparty display.
+
+Person 5 – Admin Panel & Audit
+- Backend: admin endpoints for users, wallets, transactions; freeze/unfreeze wallet; `AdminAuditLog` entity and logging; role-based access control.
+- Frontend: admin dashboard (users, wallets, transactions, freeze/unfreeze controls).
 - Database: AdminAuditLog table.
-- Testing: freeze wallet, admin authorization, transaction history, audit logging.
+- Testing: freeze/unfreeze, admin authorization, audit logging.
 
 ## Development order
 
 1. Person 1 completes authentication and wallet creation.
-2. Person 2 builds top-up and transfers.
-3. Person 3 builds merchants and payments.
-4. Person 4 builds admin features and transaction history.
+2. Person 2 builds top-up and core balance logic.
+3. Person 3 builds transfers and merchant payments.
+4. Person 4 builds transaction history and filtering.
+5. Person 5 builds admin features and audit.
 
 ## Git branch workflow
 
 - `main` - stable integration branch
 - `person1/auth-user-management`
-- `person2/wallet-ops`
-- `person3/merchant-payments`
-- `person4/admin-history`
+- `person2/wallet-topup-core`
+- `person3/transfers-payments`
+- `person4/transaction-history`
+- `person5/admin-audit`
 
 > Each person should branch from `main`, implement their feature module, and open a pull request to merge back into `main`.
 
