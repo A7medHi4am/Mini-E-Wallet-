@@ -15,7 +15,7 @@
 
 This project is a closed wallet system with:
 - Backend: Java 17, Spring Boot, Spring Web, Spring Security, Spring Data JPA
-- Database: PostgreSQL for production, H2 in-memory for local development scaffold
+- Database: PostgreSQL for development and production
 - Frontend: React (Vite or Create React App) with fetch/axios for API calls
 - Authentication: JWT and BCrypt password hashing
 - Testing: backend unit/integration tests with JUnit 5 + Mockito; frontend component tests
@@ -121,5 +121,5 @@ Person 4 – Admin Panel & Transaction History
 
 ## Notes
 
-- There is also H2 support for quick local testing if you need a lightweight fallback.
+- The backend is configured for PostgreSQL only; H2 is not used.
 - Add frontend scaffolding in separate folders when ready.
