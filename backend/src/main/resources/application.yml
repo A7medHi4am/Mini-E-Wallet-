@@ -15,6 +15,11 @@ spring:
       hibernate:
         format_sql: true
 
+app:
+  jwt:
+    secret: ${JWT_SECRET:j02qK8DlZPd4RmSHXkSAyYb5pxQyJ5fkqMTiMVn8ceCXjLma8HXWQIX2tHXk2A/G}
+    expiration-ms: ${JWT_EXPIRATION_MS:3600000}
+
 logging:
   level:
     root: INFO

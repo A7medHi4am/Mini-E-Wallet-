@@ -1,8 +1,19 @@
 package com.example.miniewallet.common.wallet;
 
-/**
- * Shared repository: findByIdForUpdate should use @Lock(PESSIMISTIC_WRITE).
- * Only LedgerServiceImpl should depend on this.
- */
-public interface WalletRepository {
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import jakarta.persistence.LockModeType;
+
+
+public interface WalletRepository extends JpaRepository<Wallet, Long> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select w from Wallet w where w.id = :id")
+    Optional<Wallet> findByIdForUpdate(@Param("id") Long id);
+
+    Optional<Wallet> findByUserId(Long userId);
 }
