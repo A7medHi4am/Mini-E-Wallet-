@@ -16,4 +16,6 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
     Optional<Wallet> findByIdForUpdate(@Param("id") Long id);
 
     Optional<Wallet> findByUserId(Long userId);
+
+    Optional<Wallet> findByMerchantId(Long merchantId);
 }

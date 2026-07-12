@@ -9,6 +9,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.example.miniewallet.common.web.ApiResponse;
+import com.example.miniewallet.merchant.MerchantHasBalanceException;
+import com.example.miniewallet.merchant.MerchantInactiveException;
+import com.example.miniewallet.merchant.MerchantNotFoundException;
+import com.example.miniewallet.merchant.RecipientNotFoundException;
+import com.example.miniewallet.merchant.SelfTransferException;
 
 
 @RestControllerAdvice
@@ -39,6 +44,31 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateRequestException.class)
     public ResponseEntity<ApiResponse<Void>> handleDuplicateRequest(DuplicateRequestException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(MerchantNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMerchantNotFound(MerchantNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(RecipientNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRecipientNotFound(RecipientNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(SelfTransferException.class)
+    public ResponseEntity<ApiResponse<Void>> handleSelfTransfer(SelfTransferException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(MerchantInactiveException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMerchantInactive(MerchantInactiveException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(MerchantHasBalanceException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMerchantHasBalance(MerchantHasBalanceException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage()));
     }
 
