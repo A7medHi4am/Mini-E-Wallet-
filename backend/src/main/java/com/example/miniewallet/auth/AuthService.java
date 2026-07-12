@@ -33,6 +33,9 @@ public class AuthService {
         if (users.existsByEmail(req.email())) {
             throw new EmailAlreadyUsedException(req.email());
         }
+        if (users.existsByPhone(req.phone())) {
+            throw new PhoneAlreadyUsedException(req.phone());
+        }
 
         User user = new User(req.name(), req.email(), req.phone(), encoder.encode(req.password()));
         users.save(user);

@@ -35,7 +35,7 @@ export default function Login() {
       }
 
       saveToken(token);
-      navigate("/profile");
+      navigate("/dashboard");
     } catch (err) {
       setError(
         err.response?.data?.error || "Login failed. Check your credentials."
