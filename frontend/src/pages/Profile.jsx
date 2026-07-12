@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import client from "../api/client";
 import { clearToken } from "../auth/auth";
 
@@ -15,7 +15,7 @@ export default function Profile() {
         // matches AuthController: @RequestMapping("/api/auth") + @GetMapping("/user")
         const res = await client.get("/api/auth/user");
         setProfile(res.data.data);
-      } catch (err) {
+      } catch {
         setError("Could not load your profile.");
       } finally {
         setLoading(false);
@@ -37,6 +37,9 @@ export default function Profile() {
   return (
     <div className="card">
       <h1>Your profile</h1>
+      <Link to="/dashboard" className="nav-link nav-link-top">
+        Back to dashboard
+      </Link>
 
       <div className="balance">
         <span className="balance-label">Wallet balance</span>
