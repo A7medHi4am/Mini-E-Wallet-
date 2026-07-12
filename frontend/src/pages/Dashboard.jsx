@@ -81,10 +81,19 @@ export default function Dashboard() {
         <Link to="/topup" className="button-link primary">
           Top up
         </Link>
-        <Link to="/profile" className="button-link secondary">
-          Profile
+        <Link to="/send" className="button-link secondary">
+          Send money
+        </Link>
+        <Link to="/merchants" className="button-link secondary">
+          Pay merchant
         </Link>
       </div>
+
+      <p className="muted">
+        <Link to="/history">View full transaction history</Link>
+        {" · "}
+        <Link to="/profile">Profile</Link>
+      </p>
 
       <h2 className="section-title">Recent transactions</h2>
 

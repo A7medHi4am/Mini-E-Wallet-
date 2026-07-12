@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -19,7 +20,12 @@ import jakarta.persistence.Table;
  * in the same transaction as the balance change it records.
  */
 @Entity
-@Table(name = "transactions")
+@Table(name = "transactions", indexes = {
+        @Index(name = "idx_transactions_sender_wallet", columnList = "sender_wallet_id"),
+        @Index(name = "idx_transactions_receiver_wallet", columnList = "receiver_wallet_id"),
+        @Index(name = "idx_transactions_created_at", columnList = "created_at"),
+        @Index(name = "idx_transactions_type", columnList = "type")
+})
 public class Transaction {
 
     @Id

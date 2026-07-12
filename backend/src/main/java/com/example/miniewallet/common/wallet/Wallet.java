@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import com.example.miniewallet.common.domain.Merchant;
 import com.example.miniewallet.common.domain.User;
 import com.example.miniewallet.common.exception.InsufficientFundsException;
 import com.example.miniewallet.common.exception.WalletFrozenException;
@@ -32,6 +33,10 @@ public class Wallet {
     @OneToOne()
     @JoinColumn(name = "user_id", unique = true)
     private User user;
+
+    @OneToOne()
+    @JoinColumn(name = "merchant_id", unique = true)
+    private Merchant merchant;
 
 
     @Column(nullable = false, precision = 19, scale = 2)
@@ -59,6 +64,14 @@ public class Wallet {
         this.createdAt = Instant.now();
     }
 
+    public Wallet(Merchant merchant) {
+        this.merchant = merchant;
+        this.balance = BigDecimal.ZERO;
+        this.currency = "EGP";
+        this.status = WalletStatus.ACTIVE;
+        this.createdAt = Instant.now();
+    }
+
     
     public Long getId() {
         return id;
@@ -66,6 +79,10 @@ public class Wallet {
 
     public User getUser() {
         return user;
+    }
+
+    public Merchant getMerchant() {
+        return merchant;
     }
 
     public BigDecimal getBalance() {

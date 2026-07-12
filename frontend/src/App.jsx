@@ -4,6 +4,10 @@ import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Dashboard from "./pages/Dashboard";
 import TopUp from "./pages/TopUp";
+import SendMoney from "./pages/SendMoney";
+import Merchants from "./pages/Merchants";
+import PayMerchant from "./pages/PayMerchant";
+import History from "./pages/History";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
 
@@ -27,6 +31,38 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <TopUp />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/send"
+            element={
+              <ProtectedRoute>
+                <SendMoney />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/merchants"
+            element={
+              <ProtectedRoute>
+                <Merchants />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pay/:merchantId"
+            element={
+              <ProtectedRoute>
+                <PayMerchant />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <History />
               </ProtectedRoute>
             }
           />
