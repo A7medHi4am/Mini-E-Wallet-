@@ -28,6 +28,15 @@ public class TransactionHistoryService {
         // upper bound is the start of the following day.
         Instant to = dateTo == null ? null : dateTo.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
 
-        return transactions.findForWallet(walletId, type, from, to, pageable);
+        if (from == null && to == null) {
+            return transactions.findForWallet(walletId, type, pageable);
+        }
+        if (from != null && to == null) {
+            return transactions.findForWalletFrom(walletId, type, from, pageable);
+        }
+        if (from == null) {
+            return transactions.findForWalletBefore(walletId, type, to, pageable);
+        }
+        return transactions.findForWalletBetween(walletId, type, from, to, pageable);
     }
 }
