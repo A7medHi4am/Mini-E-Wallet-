@@ -1,7 +1,3 @@
-// Reusable across the app: the full history page (Person 4) renders this
-// for the current user's transactions, and the admin dashboard (Person 5)
-// can reuse it as-is for any wallet's transactions by passing its own items.
-
 function formatDate(value) {
   return new Date(value).toLocaleString();
 }
