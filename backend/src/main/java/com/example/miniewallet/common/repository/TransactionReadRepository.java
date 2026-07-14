@@ -26,17 +26,74 @@ public interface TransactionReadRepository extends Repository<Transaction, Long>
             + "left join fetch rw.merchant "
             + "where (sw.id = :walletId or rw.id = :walletId) "
             + "and (:type is null or t.type = :type) "
-            + "and (:from is null or t.createdAt >= :from) "
-            + "and (:to is null or t.createdAt < :to) "
+            + "order by t.createdAt desc",
+            countQuery = "select count(t) from Transaction t "
+            + "where (t.senderWallet.id = :walletId or t.receiverWallet.id = :walletId) "
+            + "and (:type is null or t.type = :type)")
+    Page<Transaction> findForWallet(@Param("walletId") Long walletId,
+                                    @Param("type") TransactionType type,
+                                    Pageable pageable);
+
+    @Query(value = "select t from Transaction t "
+            + "left join fetch t.senderWallet sw "
+            + "left join fetch sw.user "
+            + "left join fetch sw.merchant "
+            + "left join fetch t.receiverWallet rw "
+            + "left join fetch rw.user "
+            + "left join fetch rw.merchant "
+            + "where (sw.id = :walletId or rw.id = :walletId) "
+            + "and (:type is null or t.type = :type) "
+            + "and t.createdAt >= :from "
             + "order by t.createdAt desc",
             countQuery = "select count(t) from Transaction t "
             + "where (t.senderWallet.id = :walletId or t.receiverWallet.id = :walletId) "
             + "and (:type is null or t.type = :type) "
-            + "and (:from is null or t.createdAt >= :from) "
-            + "and (:to is null or t.createdAt < :to)")
-    Page<Transaction> findForWallet(@Param("walletId") Long walletId,
-                                     @Param("type") TransactionType type,
-                                     @Param("from") Instant from,
-                                     @Param("to") Instant to,
-                                     Pageable pageable);
+            + "and t.createdAt >= :from")
+    Page<Transaction> findForWalletFrom(@Param("walletId") Long walletId,
+                                        @Param("type") TransactionType type,
+                                        @Param("from") Instant from,
+                                        Pageable pageable);
+
+    @Query(value = "select t from Transaction t "
+            + "left join fetch t.senderWallet sw "
+            + "left join fetch sw.user "
+            + "left join fetch sw.merchant "
+            + "left join fetch t.receiverWallet rw "
+            + "left join fetch rw.user "
+            + "left join fetch rw.merchant "
+            + "where (sw.id = :walletId or rw.id = :walletId) "
+            + "and (:type is null or t.type = :type) "
+            + "and t.createdAt < :to "
+            + "order by t.createdAt desc",
+            countQuery = "select count(t) from Transaction t "
+            + "where (t.senderWallet.id = :walletId or t.receiverWallet.id = :walletId) "
+            + "and (:type is null or t.type = :type) "
+            + "and t.createdAt < :to")
+    Page<Transaction> findForWalletBefore(@Param("walletId") Long walletId,
+                                          @Param("type") TransactionType type,
+                                          @Param("to") Instant to,
+                                          Pageable pageable);
+
+    @Query(value = "select t from Transaction t "
+            + "left join fetch t.senderWallet sw "
+            + "left join fetch sw.user "
+            + "left join fetch sw.merchant "
+            + "left join fetch t.receiverWallet rw "
+            + "left join fetch rw.user "
+            + "left join fetch rw.merchant "
+            + "where (sw.id = :walletId or rw.id = :walletId) "
+            + "and (:type is null or t.type = :type) "
+            + "and t.createdAt >= :from "
+            + "and t.createdAt < :to "
+            + "order by t.createdAt desc",
+            countQuery = "select count(t) from Transaction t "
+            + "where (t.senderWallet.id = :walletId or t.receiverWallet.id = :walletId) "
+            + "and (:type is null or t.type = :type) "
+            + "and t.createdAt >= :from "
+            + "and t.createdAt < :to")
+    Page<Transaction> findForWalletBetween(@Param("walletId") Long walletId,
+                                           @Param("type") TransactionType type,
+                                           @Param("from") Instant from,
+                                           @Param("to") Instant to,
+                                           Pageable pageable);
 }
