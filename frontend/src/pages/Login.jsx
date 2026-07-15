@@ -35,7 +35,9 @@ export default function Login() {
       }
 
       saveToken(token);
-      navigate("/dashboard");
+      const profileRes = await client.get("/api/auth/user");
+      const role = profileRes.data.data?.role;
+      navigate(role === "ADMIN" ? "/admin" : "/dashboard");
     } catch (err) {
       setError(
         err.response?.data?.error || "Login failed. Check your credentials."

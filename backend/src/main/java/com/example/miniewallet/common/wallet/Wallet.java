@@ -72,7 +72,18 @@ public class Wallet {
         this.createdAt = Instant.now();
     }
 
-    
+    public void freeze() {
+        if (this.status != WalletStatus.FROZEN) {
+            this.status = WalletStatus.FROZEN;
+        }
+    }
+
+    public void activate() {
+        if (this.status != WalletStatus.ACTIVE) {
+            this.status = WalletStatus.ACTIVE;
+        }
+    }
+
     public Long getId() {
         return id;
     }

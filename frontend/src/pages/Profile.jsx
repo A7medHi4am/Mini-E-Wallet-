@@ -65,6 +65,12 @@ export default function Profile() {
         <dd>{profile.role}</dd>
       </dl>
 
+      {profile.role === "ADMIN" && (
+        <Link to="/admin" className="button-link secondary">
+          Go to admin panel
+        </Link>
+      )}
+
       <button className="secondary" onClick={handleLogout}>
         Log out
       </button>

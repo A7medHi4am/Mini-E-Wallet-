@@ -8,6 +8,7 @@ import SendMoney from "./pages/SendMoney";
 import Merchants from "./pages/Merchants";
 import PayMerchant from "./pages/PayMerchant";
 import History from "./pages/History";
+import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
 
@@ -74,7 +75,14 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          {}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </div>

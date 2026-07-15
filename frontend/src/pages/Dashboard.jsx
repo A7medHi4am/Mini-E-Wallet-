@@ -61,8 +61,17 @@ export default function Dashboard() {
 
   return (
     <div className="card">
-      <h1>Dashboard</h1>
-      <p className="subtitle">Your wallet at a glance.</p>
+      <div className="dashboard-header">
+        <div>
+          <h1>Dashboard</h1>
+          <p className="subtitle">Your wallet at a glance.</p>
+        </div>
+        {profile?.role === "ADMIN" && (
+          <Link to="/admin" className="button-link secondary admin-quick-link">
+            Admin panel
+          </Link>
+        )}
+      </div>
 
       <div className="balance">
         <span className="balance-label">Wallet balance</span>
