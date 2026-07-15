@@ -2,7 +2,6 @@ package com.example.miniewallet.history;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 

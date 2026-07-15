@@ -586,3 +586,60 @@ select {
   color: var(--muted);
   white-space: nowrap;
 }
+
+/* top-up: simulated vs. card tabs */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tab {
+  flex: 1;
+  width: auto;
+  margin-top: 0;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* payment result popup */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--card);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.modal-card p {
+  margin: 0;
+}
+
+.modal-card button {
+  margin-top: 18px;
+}

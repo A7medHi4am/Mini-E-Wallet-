@@ -27,5 +27,17 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
 
+  # Forwards Stripe webhook events to the backend for local testing.
+  # Not started by default — only whoever is testing the top-up-with-card
+  # flow needs it: `docker compose --profile stripe up stripe-cli`.
+  # Prints a fresh "whsec_..." signing secret in its logs on every start;
+  # copy that into .env as STRIPE_WEBHOOK_SECRET and restart the backend.
+  stripe-cli:
+    image: stripe/stripe-cli
+    profiles: ["stripe"]
+    command: listen --api-key ${STRIPE_SECRET_KEY} --forward-to backend:8080/api/wallet/topup/webhook
+    depends_on:
+      - backend
+
 volumes:
   pgdata:
