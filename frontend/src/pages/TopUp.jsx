@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import client from "../api/client";
 
 const MIN_AMOUNT = 10;
@@ -11,6 +11,7 @@ export default function TopUp() {
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [searchParams] = useSearchParams();
 
   function validate(value) {
     const numeric = Number(value);
@@ -34,6 +35,11 @@ export default function TopUp() {
     setLoading(true);
     try {
       const res = await client.post("/api/wallet/topup", { amount, referenceId });
+      const checkoutUrl = res.data?.data?.checkoutUrl;
+      if (checkoutUrl) {
+        window.location.assign(checkoutUrl);
+        return;
+      }
       setResult(res.data.data);
       setReferenceId(crypto.randomUUID());
       setAmount("");
@@ -44,10 +50,30 @@ export default function TopUp() {
     }
   }
 
+  useEffect(() => {
+    const sessionId = searchParams.get("session_id");
+    if (!sessionId) {
+      return;
+    }
+
+    async function confirmCheckout() {
+      try {
+        const res = await client.post(`/api/wallet/topup/confirm?sessionId=${encodeURIComponent(sessionId)}`);
+        setResult(res.data.data);
+        setReferenceId(crypto.randomUUID());
+        setAmount("");
+      } catch (err) {
+        setError(err.response?.data?.error || "We could not confirm your payment. Please try again.");
+      }
+    }
+
+    confirmCheckout();
+  }, [searchParams]);
+
   return (
     <div className="card">
       <h1>Top up your wallet</h1>
-      <p className="subtitle">Simulated top-up — no real payment is charged.</p>
+      <p className="subtitle">Secure Stripe checkout for real card payments.</p>
 
       <label>
         Amount ({MIN_AMOUNT}–{MAX_AMOUNT} EGP)
@@ -73,7 +99,7 @@ export default function TopUp() {
 
       {result && (
         <div className="notice" role="status">
-          Top-up successful. New balance will show on your dashboard.
+          Top-up successful. Your balance has been updated.
         </div>
       )}
 

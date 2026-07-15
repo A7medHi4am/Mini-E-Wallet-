@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.miniewallet.common.exception.WalletNotFoundException;
@@ -32,20 +33,34 @@ public class WalletController {
     private final WalletRepository wallets;
     private final TransactionRepository transactionRepository;
     private final CurrentUserResolver currentUserResolver;
+    private final StripeService stripeService;
 
     public WalletController(LedgerService ledgerService, WalletRepository wallets,
                              TransactionRepository transactionRepository,
-                             CurrentUserResolver currentUserResolver) {
+                             CurrentUserResolver currentUserResolver, StripeService stripeService) {
         this.ledgerService = ledgerService;
         this.wallets = wallets;
         this.transactionRepository = transactionRepository;
         this.currentUserResolver = currentUserResolver;
+        this.stripeService = stripeService;
     }
 
     @PostMapping("/topup")
-    public ResponseEntity<ApiResponse<TransactionResponse>> topUp(@Valid @RequestBody TopUpRequest request) {
+    public ResponseEntity<ApiResponse<TopUpCheckoutResponse>> createTopUpCheckout(@Valid @RequestBody TopUpRequest request) {
         Wallet wallet = currentWallet();
-        Transaction transaction = ledgerService.topUp(wallet.getId(), request.amount(), request.referenceId());
+        TopUpCheckoutResponse checkout = stripeService.createCheckoutSession(request.amount(), request.referenceId(), wallet.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(checkout));
+    }
+
+    @PostMapping("/topup/confirm")
+    public ResponseEntity<ApiResponse<TransactionResponse>> confirmTopUp(@RequestParam String sessionId) {
+        Wallet wallet = currentWallet();
+        if (!stripeService.isPaid(sessionId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error("Stripe payment has not been completed yet."));
+        }
+
+        StripeCheckoutDetails details = stripeService.getCheckoutDetails(sessionId);
+        Transaction transaction = ledgerService.topUp(wallet.getId(), details.amount(), details.referenceId());
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(TransactionResponse.from(transaction)));
     }
 
