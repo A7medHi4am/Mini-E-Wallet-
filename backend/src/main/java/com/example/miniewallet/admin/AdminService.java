@@ -6,11 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.miniewallet.common.domain.User;
-import com.example.miniewallet.common.wallet.TransactionRepository;
 import com.example.miniewallet.common.repository.UserRepository;
+import com.example.miniewallet.common.wallet.TransactionRepository;
 import com.example.miniewallet.common.wallet.Wallet;
 import com.example.miniewallet.common.wallet.WalletRepository;
-import com.example.miniewallet.common.wallet.WalletStatus;
 
 @Service
 public class AdminService {
