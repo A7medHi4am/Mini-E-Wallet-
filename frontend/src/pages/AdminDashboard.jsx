@@ -2,7 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import { clearToken } from '../auth/auth';
-import { fetchUsers, fetchWallets, fetchTransactions, freezeWallet, unfreezeWallet } from '../services/adminApi';
+import {
+  fetchUsers,
+  fetchWallets,
+  fetchTransactions,
+  freezeWallet,
+  unfreezeWallet,
+  fetchMerchants,
+  createMerchant,
+} from '../services/adminApi';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -10,26 +18,34 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [wallets, setWallets] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [merchants, setMerchants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshFlag, setRefreshFlag] = useState(false);
+
+  const [merchantName, setMerchantName] = useState('');
+  const [merchantCategory, setMerchantCategory] = useState('');
+  const [merchantError, setMerchantError] = useState('');
+  const [creatingMerchant, setCreatingMerchant] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const [profileRes, usersRes, walletsRes, transactionsRes] = await Promise.all([
+        const [profileRes, usersRes, walletsRes, transactionsRes, merchantsRes] = await Promise.all([
           client.get('/api/auth/user'),
           fetchUsers(),
           fetchWallets(),
           fetchTransactions(),
+          fetchMerchants(),
         ]);
 
         setProfile(profileRes.data.data);
         setUsers(usersRes);
         setWallets(walletsRes);
         setTransactions(transactionsRes);
+        setMerchants(merchantsRes);
       } catch (err) {
         setError('Failed to fetch admin data.');
       } finally {
@@ -39,6 +55,27 @@ const AdminDashboard = () => {
 
     fetchData();
   }, [refreshFlag]);
+
+  const handleCreateMerchant = async (event) => {
+    event.preventDefault();
+    if (!merchantName.trim() || !merchantCategory.trim()) {
+      setMerchantError('Name and category are required.');
+      return;
+    }
+
+    setMerchantError('');
+    setCreatingMerchant(true);
+    try {
+      await createMerchant({ name: merchantName.trim(), category: merchantCategory.trim() });
+      setMerchantName('');
+      setMerchantCategory('');
+      setRefreshFlag(!refreshFlag);
+    } catch (err) {
+      setMerchantError(err.response?.data?.error || 'Failed to create merchant.');
+    } finally {
+      setCreatingMerchant(false);
+    }
+  };
 
   const handleFreeze = async (walletId) => {
     try {
@@ -104,6 +141,10 @@ const AdminDashboard = () => {
         <div className="admin-summary-card">
           <span className="summary-label">Transactions</span>
           <strong>{transactions.length}</strong>
+        </div>
+        <div className="admin-summary-card">
+          <span className="summary-label">Merchants</span>
+          <strong>{merchants.length}</strong>
         </div>
       </div>
 
@@ -193,6 +234,74 @@ const AdminDashboard = () => {
 
       <section className="admin-section">
         <div className="section-heading">
+          <h2>Merchants</h2>
+          <p className="hint">Create a merchant so users can pay it from their wallet.</p>
+        </div>
+
+        <form className="merchant-form" onSubmit={handleCreateMerchant}>
+          <label>
+            Name
+            <input
+              value={merchantName}
+              onChange={(e) => setMerchantName(e.target.value)}
+              placeholder="Coffee Shop"
+            />
+          </label>
+          <label>
+            Category
+            <input
+              value={merchantCategory}
+              onChange={(e) => setMerchantCategory(e.target.value)}
+              placeholder="Food & Drink"
+            />
+          </label>
+          <button type="submit" disabled={creatingMerchant}>
+            {creatingMerchant ? 'Creating…' : 'Create merchant'}
+          </button>
+        </form>
+
+        {merchantError && (
+          <div className="error" role="alert">
+            {merchantError}
+          </div>
+        )}
+
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {merchants.length === 0 ? (
+              <tr>
+                <td colSpan="4" className="empty-state">
+                  No merchants yet.
+                </td>
+              </tr>
+            ) : (
+              merchants.map((merchant) => (
+                <tr key={merchant.id}>
+                  <td>{merchant.id}</td>
+                  <td>{merchant.name}</td>
+                  <td>{merchant.category}</td>
+                  <td>
+                    <span className={`badge ${merchant.active ? 'active' : 'inactive'}`}>
+                      {merchant.active ? 'ACTIVE' : 'INACTIVE'}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="admin-section">
+        <div className="section-heading">
           <h2>Recent transactions</h2>
           <p className="hint">Latest activity across the wallet platform.</p>
         </div>
@@ -200,16 +309,18 @@ const AdminDashboard = () => {
           <thead>
             <tr>
               <th>ID</th>
-              <th>User</th>
+              <th>From wallet</th>
+              <th>To wallet</th>
               <th>Amount</th>
               <th>Type</th>
+              <th>Status</th>
               <th>Date</th>
             </tr>
           </thead>
           <tbody>
             {transactions.length === 0 ? (
               <tr>
-                <td colSpan="5" className="empty-state">
+                <td colSpan="7" className="empty-state">
                   No transactions yet.
                 </td>
               </tr>
@@ -217,10 +328,12 @@ const AdminDashboard = () => {
               transactions.map((tx) => (
                 <tr key={tx.id}>
                   <td>{tx.id}</td>
-                  <td>{tx.userName}</td>
+                  <td>{tx.senderWalletId ?? "—"}</td>
+                  <td>{tx.receiverWalletId ?? "—"}</td>
                   <td>{Number(tx.amount).toFixed(2)}</td>
                   <td>{tx.type}</td>
-                  <td>{new Date(tx.date).toLocaleString()}</td>
+                  <td>{tx.status}</td>
+                  <td>{new Date(tx.createdAt).toLocaleString()}</td>
                 </tr>
               ))
             )}

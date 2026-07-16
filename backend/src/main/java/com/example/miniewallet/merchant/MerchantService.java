@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.miniewallet.admin.AdminAuditService;
 import com.example.miniewallet.common.domain.Merchant;
 import com.example.miniewallet.common.exception.WalletNotFoundException;
 import com.example.miniewallet.common.repository.MerchantRepository;
@@ -18,10 +19,12 @@ public class MerchantService {
 
     private final MerchantRepository merchants;
     private final WalletRepository wallets;
+    private final AdminAuditService auditService;
 
-    public MerchantService(MerchantRepository merchants, WalletRepository wallets) {
+    public MerchantService(MerchantRepository merchants, WalletRepository wallets, AdminAuditService auditService) {
         this.merchants = merchants;
         this.wallets = wallets;
+        this.auditService = auditService;
     }
 
     @Transactional
@@ -32,6 +35,7 @@ public class MerchantService {
         Wallet wallet = new Wallet(merchant);
         wallets.save(wallet);
 
+        auditService.logAction("CREATE_MERCHANT", "MERCHANT", merchant.getId());
         return merchant;
     }
 
@@ -60,6 +64,7 @@ public class MerchantService {
     public Merchant updateMerchant(Long id, MerchantRequest request) {
         Merchant merchant = getMerchant(id);
         merchant.rename(request.name(), request.category());
+        auditService.logAction("UPDATE_MERCHANT", "MERCHANT", merchant.getId());
         return merchant;
     }
 
@@ -67,6 +72,7 @@ public class MerchantService {
     public Merchant setActive(Long id, boolean active) {
         Merchant merchant = getMerchant(id);
         merchant.setActive(active);
+        auditService.logAction(active ? "ACTIVATE_MERCHANT" : "DEACTIVATE_MERCHANT", "MERCHANT", merchant.getId());
         return merchant;
     }
 
@@ -79,5 +85,6 @@ public class MerchantService {
         }
         wallets.delete(wallet);
         merchants.delete(merchant);
+        auditService.logAction("DELETE_MERCHANT", "MERCHANT", id);
     }
 }

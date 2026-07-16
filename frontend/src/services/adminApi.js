@@ -22,3 +22,13 @@ export const freezeWallet = async (walletId) => {
 export const unfreezeWallet = async (walletId) => {
   await client.put(`/api/admin/wallets/${walletId}/unfreeze`);
 };
+
+export const fetchMerchants = async () => {
+  const response = await client.get('/api/admin/merchants');
+  return response.data.data.content;
+};
+
+export const createMerchant = async (merchant) => {
+  const response = await client.post('/api/admin/merchants', merchant);
+  return response.data.data;
+};
