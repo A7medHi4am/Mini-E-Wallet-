@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import { clearToken } from '../auth/auth';
@@ -11,6 +11,8 @@ import {
   fetchMerchants,
   createMerchant,
 } from '../services/adminApi';
+
+const TRANSACTION_TYPES = ['TOPUP', 'TRANSFER', 'PAYMENT', 'REFUND'];
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -27,6 +29,12 @@ const AdminDashboard = () => {
   const [merchantCategory, setMerchantCategory] = useState('');
   const [merchantError, setMerchantError] = useState('');
   const [creatingMerchant, setCreatingMerchant] = useState(false);
+
+  const [userQuery, setUserQuery] = useState('');
+  const [walletQuery, setWalletQuery] = useState('');
+  const [walletStatus, setWalletStatus] = useState('');
+  const [merchantQuery, setMerchantQuery] = useState('');
+  const [transactionType, setTransactionType] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,6 +63,37 @@ const AdminDashboard = () => {
 
     fetchData();
   }, [refreshFlag]);
+
+  const filteredUsers = useMemo(() => {
+    const q = userQuery.trim().toLowerCase();
+    if (!q) return users;
+    return users.filter(
+      (user) => user.name?.toLowerCase().includes(q) || user.email?.toLowerCase().includes(q)
+    );
+  }, [users, userQuery]);
+
+  const filteredWallets = useMemo(() => {
+    const q = walletQuery.trim().toLowerCase();
+    return wallets.filter((wallet) => {
+      const matchesStatus = !walletStatus || wallet.status === walletStatus;
+      const matchesQuery = !q || wallet.ownerName?.toLowerCase().includes(q);
+      return matchesStatus && matchesQuery;
+    });
+  }, [wallets, walletQuery, walletStatus]);
+
+  const filteredMerchants = useMemo(() => {
+    const q = merchantQuery.trim().toLowerCase();
+    if (!q) return merchants;
+    return merchants.filter(
+      (merchant) =>
+        merchant.name?.toLowerCase().includes(q) || merchant.category?.toLowerCase().includes(q)
+    );
+  }, [merchants, merchantQuery]);
+
+  const filteredTransactions = useMemo(() => {
+    if (!transactionType) return transactions;
+    return transactions.filter((tx) => tx.type === transactionType);
+  }, [transactions, transactionType]);
 
   const handleCreateMerchant = async (event) => {
     event.preventDefault();
@@ -104,7 +143,7 @@ const AdminDashboard = () => {
   if (error) return <div className="card error">{error}</div>;
 
   return (
-    <div className="card card-wide admin-dashboard">
+    <div className="card card-wide card-admin admin-dashboard">
       <div className="admin-header">
         <div>
           <h1>Admin dashboard</h1>
@@ -112,7 +151,7 @@ const AdminDashboard = () => {
           {profile && (
             <div className="admin-profile-summary">
               <p>
-                Signed in as <strong>{profile.name}</strong> — <span>{profile.role}</span>
+                Signed in as <strong>{profile.name}</strong> — <span className="muted-inline">{profile.role}</span>
               </p>
               <p className="muted-inline">{profile.email}</p>
             </div>
@@ -120,6 +159,9 @@ const AdminDashboard = () => {
         </div>
 
         <div className="admin-actions">
+          <Link to="/dashboard" className="button-link secondary">
+            My wallet
+          </Link>
           <Link to="/profile" className="button-link secondary">
             My profile
           </Link>
@@ -153,32 +195,43 @@ const AdminDashboard = () => {
           <h2>Users</h2>
           <p className="hint">All registered users in the system.</p>
         </div>
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.length === 0 ? (
+
+        <div className="search-row">
+          <input
+            value={userQuery}
+            onChange={(e) => setUserQuery(e.target.value)}
+            placeholder="Search users by name or email…"
+          />
+        </div>
+
+        <div className="table-wrap">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <td colSpan="3" className="empty-state">
-                  No users available.
-                </td>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
               </tr>
-            ) : (
-              users.map((user) => (
-                <tr key={user.id}>
-                  <td>{user.id}</td>
-                  <td>{user.name}</td>
-                  <td>{user.email}</td>
+            </thead>
+            <tbody>
+              {filteredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan="3" className="empty-state">
+                    No users match your search.
+                  </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                filteredUsers.map((user) => (
+                  <tr key={user.id}>
+                    <td>{user.id}</td>
+                    <td>{user.name}</td>
+                    <td>{user.email}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section className="admin-section">
@@ -186,50 +239,72 @@ const AdminDashboard = () => {
           <h2>Wallets</h2>
           <p className="hint">Freeze or unfreeze wallets as needed.</p>
         </div>
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>User</th>
-              <th>Balance</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {wallets.length === 0 ? (
+
+        <div className="filter-bar">
+          <div className="field field-wide">
+            Owner
+            <input
+              value={walletQuery}
+              onChange={(e) => setWalletQuery(e.target.value)}
+              placeholder="Search by owner name…"
+            />
+          </div>
+          <div className="field">
+            Status
+            <select value={walletStatus} onChange={(e) => setWalletStatus(e.target.value)}>
+              <option value="">All</option>
+              <option value="ACTIVE">Active</option>
+              <option value="FROZEN">Frozen</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="table-wrap">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <td colSpan="5" className="empty-state">
-                  No wallet records found.
-                </td>
+                <th>ID</th>
+                <th>User</th>
+                <th>Balance</th>
+                <th>Status</th>
+                <th>Action</th>
               </tr>
-            ) : (
-              wallets.map((wallet) => (
-                <tr key={wallet.id}>
-                  <td>{wallet.id}</td>
-                  <td>{wallet.ownerName}</td>
-                  <td>{Number(wallet.balance).toFixed(2)}</td>
-                  <td>
-                    <span className={`badge ${wallet.status.toLowerCase()}`}>
-                      {wallet.status}
-                    </span>
-                  </td>
-                  <td>
-                    {wallet.status === 'ACTIVE' ? (
-                      <button onClick={() => handleFreeze(wallet.id)}>
-                        Freeze
-                      </button>
-                    ) : (
-                      <button onClick={() => handleUnfreeze(wallet.id)}>
-                        Unfreeze
-                      </button>
-                    )}
+            </thead>
+            <tbody>
+              {filteredWallets.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="empty-state">
+                    No wallet records match these filters.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                filteredWallets.map((wallet) => (
+                  <tr key={wallet.id}>
+                    <td>{wallet.id}</td>
+                    <td>{wallet.ownerName}</td>
+                    <td>{Number(wallet.balance).toFixed(2)}</td>
+                    <td>
+                      <span className={`badge ${wallet.status.toLowerCase()}`}>
+                        {wallet.status}
+                      </span>
+                    </td>
+                    <td>
+                      {wallet.status === 'ACTIVE' ? (
+                        <button className="table-btn secondary" onClick={() => handleFreeze(wallet.id)}>
+                          Freeze
+                        </button>
+                      ) : (
+                        <button className="table-btn" onClick={() => handleUnfreeze(wallet.id)}>
+                          Unfreeze
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section className="admin-section">
@@ -266,38 +341,48 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {merchants.length === 0 ? (
+        <div className="search-row">
+          <input
+            value={merchantQuery}
+            onChange={(e) => setMerchantQuery(e.target.value)}
+            placeholder="Search merchants by name or category…"
+          />
+        </div>
+
+        <div className="table-wrap">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <td colSpan="4" className="empty-state">
-                  No merchants yet.
-                </td>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Status</th>
               </tr>
-            ) : (
-              merchants.map((merchant) => (
-                <tr key={merchant.id}>
-                  <td>{merchant.id}</td>
-                  <td>{merchant.name}</td>
-                  <td>{merchant.category}</td>
-                  <td>
-                    <span className={`badge ${merchant.active ? 'active' : 'inactive'}`}>
-                      {merchant.active ? 'ACTIVE' : 'INACTIVE'}
-                    </span>
+            </thead>
+            <tbody>
+              {filteredMerchants.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="empty-state">
+                    No merchants match your search.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                filteredMerchants.map((merchant) => (
+                  <tr key={merchant.id}>
+                    <td>{merchant.id}</td>
+                    <td>{merchant.name}</td>
+                    <td>{merchant.category}</td>
+                    <td>
+                      <span className={`badge ${merchant.active ? 'active' : 'inactive'}`}>
+                        {merchant.active ? 'ACTIVE' : 'INACTIVE'}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section className="admin-section">
@@ -305,40 +390,57 @@ const AdminDashboard = () => {
           <h2>Recent transactions</h2>
           <p className="hint">Latest activity across the wallet platform.</p>
         </div>
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>From wallet</th>
-              <th>To wallet</th>
-              <th>Amount</th>
-              <th>Type</th>
-              <th>Status</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions.length === 0 ? (
+
+        <div className="filter-bar">
+          <div className="field">
+            Type
+            <select value={transactionType} onChange={(e) => setTransactionType(e.target.value)}>
+              <option value="">All</option>
+              {TRANSACTION_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="table-wrap">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <td colSpan="7" className="empty-state">
-                  No transactions yet.
-                </td>
+                <th>ID</th>
+                <th>From wallet</th>
+                <th>To wallet</th>
+                <th>Amount</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Date</th>
               </tr>
-            ) : (
-              transactions.map((tx) => (
-                <tr key={tx.id}>
-                  <td>{tx.id}</td>
-                  <td>{tx.senderWalletId ?? "—"}</td>
-                  <td>{tx.receiverWalletId ?? "—"}</td>
-                  <td>{Number(tx.amount).toFixed(2)}</td>
-                  <td>{tx.type}</td>
-                  <td>{tx.status}</td>
-                  <td>{new Date(tx.createdAt).toLocaleString()}</td>
+            </thead>
+            <tbody>
+              {filteredTransactions.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="empty-state">
+                    No transactions match this filter.
+                  </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                filteredTransactions.map((tx) => (
+                  <tr key={tx.id}>
+                    <td>{tx.id}</td>
+                    <td>{tx.senderWalletId ?? "—"}</td>
+                    <td>{tx.receiverWalletId ?? "—"}</td>
+                    <td>{Number(tx.amount).toFixed(2)}</td>
+                    <td>{tx.type}</td>
+                    <td>{tx.status}</td>
+                    <td>{new Date(tx.createdAt).toLocaleString()}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   );

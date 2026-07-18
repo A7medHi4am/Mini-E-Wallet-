@@ -66,7 +66,7 @@ export default function Profile() {
       </dl>
 
       {profile.role === "ADMIN" && (
-        <Link to="/admin" className="button-link secondary">
+        <Link to="/admin" className="button-link secondary admin-quick-link">
           Go to admin panel
         </Link>
       )}

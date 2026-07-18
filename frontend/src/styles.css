@@ -195,7 +195,38 @@ button.secondary {
   margin: 0;
 }
 
+.button-link {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button-link.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.button-link.secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
 /* dashboard */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
 .actions {
   display: flex;
   gap: 10px;
@@ -204,23 +235,12 @@ button.secondary {
 
 .actions .button-link {
   flex: 1;
-  text-align: center;
-  text-decoration: none;
   padding: 14px 12px;
-  border-radius: 8px;
   font-size: 0.95rem;
-  font-weight: 600;
 }
 
-.actions .button-link.primary {
-  background: var(--accent);
-  color: var(--accent-ink);
-}
-
-.actions .button-link.secondary {
-  background: transparent;
-  color: var(--accent);
-  border: 1px solid var(--accent);
+.admin-quick-link {
+  margin: 4px 0;
 }
 
 .section-title {
@@ -474,6 +494,11 @@ button.secondary {
   font-size: 0.85rem;
 }
 
+.filter-bar .field.field-wide {
+  flex: 2;
+  min-width: 200px;
+}
+
 .filter-bar button {
   width: auto;
   margin-top: 0;
@@ -642,4 +667,181 @@ select {
 
 .modal-card button {
   margin-top: 18px;
+}
+
+/* admin dashboard */
+.card-admin {
+  max-width: 1080px;
+  text-align: left;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.admin-profile-summary {
+  margin-top: 12px;
+  font-size: 0.85rem;
+}
+
+.admin-profile-summary p {
+  margin: 0 0 2px;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.admin-actions .button-link {
+  width: auto;
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+.admin-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 20px 0 8px;
+}
+
+.admin-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px;
+  background: var(--notice-bg);
+  border-radius: 10px;
+}
+
+.admin-summary-card .summary-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.admin-summary-card strong {
+  font-size: 1.6rem;
+  color: var(--ink);
+}
+
+.admin-section {
+  margin-top: 32px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+}
+
+.admin-section:first-of-type {
+  margin-top: 24px;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.section-heading .hint {
+  margin: 0;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 11px 14px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.admin-table thead th {
+  background: var(--notice-bg);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-table tbody tr:hover {
+  background: #fafbfc;
+}
+
+.admin-table td.empty-state {
+  white-space: normal;
+}
+
+.table-btn {
+  width: auto;
+  margin-top: 0;
+  padding: 6px 14px;
+  font-size: 0.78rem;
+}
+
+.table-btn.secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.merchant-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.merchant-form label {
+  flex: 1;
+  min-width: 160px;
+  margin-bottom: 0;
+}
+
+.merchant-form input {
+  margin-top: 6px;
+}
+
+.merchant-form button {
+  width: auto;
+  flex-shrink: 0;
+  padding: 11px 22px;
+}
+
+.results-count {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: -6px 0 12px;
 }
